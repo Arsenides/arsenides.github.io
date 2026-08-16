@@ -2,37 +2,31 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://arsenides.github.io/</loc>
-    <lastmod>2026-08-17T01:48:49+08:00</lastmod>
+    <lastmod>2026-08-17T02:14:29+08:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://arsenides.github.io/post/eCLSWc/</loc>
-    <lastmod>2026-08-17T00:59:26+00:00</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
     <loc>https://arsenides.github.io/post/</loc>
-    <lastmod>2026-08-17T01:48:49+08:00</lastmod>
+    <lastmod>2026-08-17T02:14:29+08:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://arsenides.github.io/tags/</loc>
-    <lastmod>2026-08-17T01:48:49+08:00</lastmod>
+    <lastmod>2026-08-17T02:14:29+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://arsenides.github.io/archives/</loc>
-    <lastmod>2026-08-17T01:48:49+08:00</lastmod>
+    <lastmod>2026-08-17T02:14:29+08:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://arsenides.github.io/links/</loc>
-    <lastmod>2026-08-17T01:48:49+08:00</lastmod>
+    <lastmod>2026-08-17T02:14:29+08:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
