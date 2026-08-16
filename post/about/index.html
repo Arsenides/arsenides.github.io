@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8" />
+<meta name="viewport"
+    content="initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, width=device-width" />
+<meta name="renderer" content="webkit">
+<meta name="format-detection" content="telephone=no, email=no, address=no">
+
+
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#292a2d" media="(prefers-color-scheme: dark)">
+
+
+<link rel="shortcut icon" href="/media/images/favicon.ico">
+<link rel="stylesheet" href="/styles/main.min.css">
+
+
+<style>:root{--accent-color:#12AA9C;}</style>
+
+
+<script>
+    // 自动为所有 target="_blank" 的链接添加 rel="noopener noreferrer"
+    document.addEventListener('DOMContentLoaded', function () {
+        var links = document.querySelectorAll('a[target="_blank"]');
+        links.forEach(function (link) {
+            var rel = link.getAttribute('rel') || '';
+            if (rel.indexOf('noopener') === -1) {
+                rel += ' noopener';
+            }
+            if (rel.indexOf('noreferrer') === -1) {
+                rel += ' noreferrer';
+            }
+            link.setAttribute('rel', rel.trim());
+        });
+    });
+</script>
+
+<script>
+    // declaraction of document.ready() function.
+    (function () {
+        var ie = !!(window.attachEvent && !window.opera);
+        var wk = /webkit\/(\d+)/i.test(navigator.userAgent) && (RegExp.$1 < 525);
+        var fn = [];
+        var run = function () {
+            for (var i = 0; i < fn.length; i++) fn[i]();
+        };
+        var d = document;
+        d.ready = function (f) {
+            if (!ie && !wk && d.addEventListener)
+                return d.addEventListener('DOMContentLoaded', f, false);
+            if (fn.push(f) > 1) return;
+            if (ie)
+                (function () {
+                    try {
+                        d.documentElement.doScroll('left');
+                        run();
+                    } catch (err) {
+                        setTimeout(arguments.callee, 0);
+                    }
+                })();
+            else if (wk)
+                var t = setInterval(function () {
+                    if (/^(loaded|complete)$/.test(d.readyState))
+                        clearInterval(t), run();
+                }, 0);
+        };
+    })();
+
+
+    document.ready(
+        function () {
+            var _Blog = window._Blog || {};
+
+            const getSystemTheme = () => {
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    return 'dark';
+                }
+                return 'light';
+            };
+
+            const configDefault = 'dark';
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme');
+            const initialTheme = currentTheme || configDefault || getSystemTheme();
+            const isDark = initialTheme === 'dark';
+
+            const updateButtons = (dark) => {
+                const sunBtn = document.getElementById("theme-toggle-sun");
+                const moonBtn = document.getElementById("theme-toggle-moon");
+                const mobileSunBtn = document.getElementById("mobile-theme-toggle-sun");
+                const mobileMoonBtn = document.getElementById("mobile-theme-toggle-moon");
+
+                if (dark) {
+                    if (sunBtn) sunBtn.style.display = 'none';
+                    if (moonBtn) moonBtn.style.display = 'inline-block';
+                    if (mobileSunBtn) mobileSunBtn.style.display = 'none';
+                    if (mobileMoonBtn) mobileMoonBtn.style.display = 'inline-block';
+                } else {
+                    if (sunBtn) sunBtn.style.display = 'inline-block';
+                    if (moonBtn) moonBtn.style.display = 'none';
+                    if (mobileSunBtn) mobileSunBtn.style.display = 'inline-block';
+                    if (mobileMoonBtn) mobileMoonBtn.style.display = 'none';
+                }
+            };
+
+            const updateThemeColor = (dark) => {
+                const themeColor = dark ? '#292a2d' : '#ffffff';
+                const metaTags = document.querySelectorAll('meta[name="theme-color"]');
+                if (metaTags.length > 0) {
+                    // 保留第一个，移除其他的，避免重复
+                    for (let i = 1; i < metaTags.length; i++) {
+                        metaTags[i].remove();
+                    }
+                    metaTags[0].setAttribute('content', themeColor);
+                    metaTags[0].removeAttribute('media');
+                } else {
+                    const meta = document.createElement('meta');
+                    meta.name = 'theme-color';
+                    meta.content = themeColor;
+                    document.head.appendChild(meta);
+                }
+            };
+
+            const applyTheme = (dark) => {
+                const body = document.getElementsByTagName('body')[0];
+                if (dark) {
+                    body.classList.add('dark-theme');
+                } else {
+                    body.classList.remove('dark-theme');
+                }
+                updateButtons(dark);
+                updateThemeColor(dark);
+            };
+
+            // Initial application
+            applyTheme(isDark);
+            if (!currentTheme) {
+                window.localStorage && window.localStorage.setItem('theme', initialTheme);
+            }
+
+            _Blog.toggleTheme = function () {
+                const toggleFunc = (e) => {
+                    // Prevent bubbling if needed, though buttons are distinct now
+                    if (e) e.stopPropagation();
+
+                    const body = document.getElementsByTagName('body')[0];
+                    const isCurrentlyDark = body.classList.contains('dark-theme');
+
+                    if (isCurrentlyDark) {
+                        body.classList.remove('dark-theme');
+                        updateButtons(false);
+                        window.localStorage && window.localStorage.setItem('theme', 'light');
+                    } else {
+                        body.classList.add('dark-theme');
+                        updateButtons(true);
+                        window.localStorage && window.localStorage.setItem('theme', 'dark');
+                    }
+                };
+
+                const sunBtn = document.getElementById("theme-toggle-sun");
+                const moonBtn = document.getElementById("theme-toggle-moon");
+                const mobileSunBtn = document.getElementById("mobile-theme-toggle-sun");
+                const mobileMoonBtn = document.getElementById("mobile-theme-toggle-moon");
+
+                if (sunBtn) sunBtn.addEventListener('click', toggleFunc);
+                if (moonBtn) moonBtn.addEventListener('click', toggleFunc);
+                if (mobileSunBtn) mobileSunBtn.addEventListener('click', toggleFunc);
+                if (mobileMoonBtn) mobileMoonBtn.addEventListener('click', toggleFunc);
+            };
+            _Blog.toggleTheme();
+
+            if (window.matchMedia && !configDefault) {
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+                    const newTheme = e.matches ? 'dark' : 'light';
+                    applyTheme(e.matches);
+                    window.localStorage && window.localStorage.setItem('theme', newTheme);
+                });
+            }
+        }
+    );
+</script>
+
+<script>
+    // Reading Progress Component
+    document.addEventListener('DOMContentLoaded', () => {
+        const progressValue = document.querySelector('.reading-value');
+        const progressCircle = document.querySelector('.progress-ring__circle');
+        const container = document.querySelector('.reading-progress-container');
+
+        // Exit if elements don't exist (e.g., not on a post page)
+        if (!progressValue || !progressCircle || !container) {
+            return;
+        }
+
+        // SVG Circle setup
+        const radius = progressCircle.r.baseVal.value;
+        const circumference = 2 * Math.PI * radius;
+
+        progressCircle.style.strokeDasharray = `${circumference} ${circumference}`;
+        progressCircle.style.strokeDashoffset = circumference;
+
+        function setProgress(percent) {
+            const safePercent = Math.min(100, Math.max(0, percent));
+            progressValue.textContent = `${Math.round(safePercent)}%`;
+            const offset = circumference - (safePercent / 100) * circumference;
+            progressCircle.style.strokeDashoffset = offset;
+        }
+
+        function onScroll() {
+            const scrollTop = window.scrollY || document.documentElement.scrollTop;
+            const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+
+            if (scrollHeight <= 0) {
+                setProgress(0);
+                return;
+            }
+
+            const scrollPercent = (scrollTop / scrollHeight) * 100;
+            setProgress(scrollPercent);
+
+            // Show/Hide logic: Show if scrolled more than 100px
+            if (scrollTop > 100) {
+                container.classList.add('show');
+            } else {
+                container.classList.remove('show');
+            }
+        }
+
+        // Initialize
+        onScroll();
+
+        // Listen for scroll events
+        window.addEventListener('scroll', onScroll, { passive: true });
+
+        // Recalculate on resize
+        window.addEventListener('resize', onScroll);
+    });
+</script>
+
+
+
+
+
+
+
+    <meta name="generator" content="Gridea Pro 1.2.2">
+    <title>关于 | Gridea Pro</title>
+
+    
+<meta name="description" content="= 清钰（日常用） = 照水（FF14常驻id） 长久以来的推 在原守人 - TSUKIPRO 文月海 - 月歌。 美合月下 - PolaPoriPosuPo 梦对象 山姥切国广 - 刀剑乱舞 Lancet-2 - 明日方舟 可能会产的品 宗守 海隼 及各种三四角恋 备注 混乱中立派杂食 日常热爱爬墙，时常一常回家看看 人不拒我我不拒人主&amp;hellip;">
+<link rel="canonical" href="https://arsenides.github.io/post/about/">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"关于","url":"https://arsenides.github.io/post/about/","description":"= 清钰（日常用） = 照水（FF14常驻id） 长久以来的推 在原守人 - TSUKIPRO 文月海 - 月歌。 美合月下 - PolaPoriPosuPo 梦对象 山姥切国广 - 刀剑乱舞 Lancet-2 - 明日方舟 可能会产的品 宗守 海隼 及各种三四角恋 备注 混乱中立派杂食 日常热爱爬墙，时常一常回家看看 人不拒我我不拒人主\u0026hellip;","datePublished":"2026-08-16T23:45:16Z","dateModified":"2026-08-16T23:45:16Z","author":{"@type":"Person","name":"Gridea Pro"},"publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"/images/avatar.png"},"name":"Gridea Pro"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","item":"https://arsenides.github.io","name":"Gridea Pro","position":1},{"@type":"ListItem","item":"https://arsenides.github.io/post/about/","name":"关于","position":2}]}</script>
+<meta property="og:title" content="关于">
+<meta property="og:description" content="= 清钰（日常用） = 照水（FF14常驻id） 长久以来的推 在原守人 - TSUKIPRO 文月海 - 月歌。 美合月下 - PolaPoriPosuPo 梦对象 山姥切国广 - 刀剑乱舞 Lancet-2 - 明日方舟 可能会产的品 宗守 海隼 及各种三四角恋 备注 混乱中立派杂食 日常热爱爬墙，时常一常回家看看 人不拒我我不拒人主&amp;hellip;">
+<meta property="og:url" content="https://arsenides.github.io/post/about/">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Gridea Pro">
+<meta property="og:image" content="/images/avatar.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:url" content="https://arsenides.github.io/post/about/">
+<meta name="twitter:title" content="关于">
+<meta name="twitter:description" content="= 清钰（日常用） = 照水（FF14常驻id） 长久以来的推 在原守人 - TSUKIPRO 文月海 - 月歌。 美合月下 - PolaPoriPosuPo 梦对象 山姥切国广 - 刀剑乱舞 Lancet-2 - 明日方舟 可能会产的品 宗守 海隼 及各种三四角恋 备注 混乱中立派杂食 日常热爱爬墙，时常一常回家看看 人不拒我我不拒人主&amp;hellip;">
+<meta name="twitter:image" content="/images/avatar.png">
+</head>
+
+<body class="">
+
+    
+<script>
+    (function () {
+        const getSystemTheme = () => {
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                return 'dark';
+            }
+            return 'light';
+        };
+
+        const configDefault = 'dark';
+        const savedTheme = localStorage.getItem('theme');
+        const theme = savedTheme || configDefault || getSystemTheme();
+
+        if (theme === 'dark') {
+            document.body.classList.add('dark-theme');
+        }
+
+        if (!savedTheme) {
+            localStorage.setItem('theme', theme);
+        }
+    })();
+</script>
+<header class="mod-head">
+    <div class="mod-head__left">
+        <div class="mod-head__logo">
+            <a href="/">
+                
+                <img class="avatar" alt="avatar" src="/images/avatar.png">
+                
+            </a>
+        </div>
+    </div>
+
+    <div class="mod-head__right">
+        <span>
+            <button id="theme-toggle-sun" class="tiptap-button theme-toggle-sun" aria-label="Switch to dark mode">
+                <svg width="18" height="18" class="tiptap-button-icon" viewBox="0 0 24 24" fill="currentColor"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M12 1C12.5523 1 13 1.44772 13 2V4C13 4.55228 12.5523 5 12 5C11.4477 5 11 4.55228 11 4V2C11 1.44772 11.4477 1 12 1Z"
+                        fill="currentColor"></path>
+                    <path fill-rule="evenodd" clip-rule="evenodd"
+                        d="M7 12C7 9.23858 9.23858 7 12 7C14.7614 7 17 9.23858 17 12C17 14.7614 14.7614 17 12 17C9.23858 17 7 14.7614 7 12ZM12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9Z"
+                        fill="currentColor"></path>
+                    <path
+                        d="M13 20C13 19.4477 12.5523 19 12 19C11.4477 19 11 19.4477 11 20V22C11 22.5523 11.4477 23 12 23C12.5523 23 13 22.5523 13 22V20Z"
+                        fill="currentColor"></path>
+                    <path
+                        d="M4.22282 4.22289C4.61335 3.83236 5.24651 3.83236 5.63704 4.22289L7.04704 5.63289C7.43756 6.02341 7.43756 6.65658 7.04704 7.0471C6.65651 7.43762 6.02335 7.43762 5.63283 7.0471L4.22282 5.6371C3.8323 5.24658 3.8323 4.61341 4.22282 4.22289Z"
+                        fill="currentColor"></path>
+                    <path
+                        d="M18.367 16.9529C17.9765 16.5623 17.3433 16.5623 16.9528 16.9529C16.5623 17.3434 16.5623 17.9766 16.9528 18.3671L18.3628 19.7771C18.7533 20.1676 19.3865 20.1676 19.777 19.7771C20.1675 19.3866 20.1675 18.7534 19.777 18.3629L18.367 16.9529Z"
+                        fill="currentColor"></path>
+                    <path
+                        d="M1 12C1 11.4477 1.44772 11 2 11H4C4.55228 11 5 11.4477 5 12C5 12.5523 4.55228 13 4 13H2C1.44772 13 1 12.5523 1 12Z"
+                        fill="currentColor"></path>
+                    <path
+                        d="M20 11C19.4477 11 19 11.4477 19 12C19 12.5523 19.4477 13 20 13H22C22.5523 13 23 12.5523 23 12C23 11.4477 22.5523 11 22 11H20Z"
+                        fill="currentColor"></path>
+                    <path
+                        d="M7.04704 16.9529C7.43756 17.3434 7.43756 17.9766 7.04704 18.3671L5.63704 19.7771C5.24651 20.1676 4.61335 20.1676 4.22282 19.7771C3.8323 19.3866 3.8323 18.7534 4.22283 18.3629L5.63283 16.9529C6.02335 16.5623 6.65651 16.5623 7.04704 16.9529Z"
+                        fill="currentColor"></path>
+                    <path
+                        d="M19.777 5.6371C20.1675 5.24657 20.1675 4.61341 19.777 4.22289C19.3865 3.83236 18.7533 3.83236 18.3628 4.22289L16.9528 5.63289C16.5623 6.02341 16.5623 6.65658 16.9528 7.0471C17.3433 7.43762 17.9765 7.43762 18.367 7.0471L19.777 5.6371Z"
+                        fill="currentColor"></path>
+                </svg>
+            </button>
+            <button id="theme-toggle-moon" class="tiptap-button theme-toggle-moon" aria-label="Switch to light mode">
+                <svg width="18" height="18" class="tiptap-button-icon" viewBox="0 0 24 24" fill="currentColor"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" clip-rule="evenodd"
+                        d="M12 2C10.0222 2 8.08879 2.58649 6.4443 3.6853C4.79981 4.78412 3.51809 6.3459 2.76121 8.17317C2.00433 10.0004 1.8063 12.0111 2.19215 13.9509C2.578 15.8907 3.53041 17.6725 4.92894 19.0711C6.32746 20.4696 8.10929 21.422 10.0491 21.8079C11.9889 22.1937 13.9996 21.9957 15.8268 21.2388C17.6541 20.4819 19.2159 19.2002 20.3147 17.5557C21.4135 15.9112 22 13.9778 22 12C22 11.5955 21.7564 11.2309 21.3827 11.0761C21.009 10.9213 20.5789 11.0069 20.2929 11.2929C19.287 12.2988 17.9226 12.864 16.5 12.864C15.0774 12.864 13.713 12.2988 12.7071 11.2929C11.7012 10.287 11.136 8.92261 11.136 7.5C11.136 6.07739 11.7012 4.71304 12.7071 3.70711C12.9931 3.42111 13.0787 2.99099 12.9239 2.61732C12.7691 2.24364 12.4045 2 12 2ZM7.55544 5.34824C8.27036 4.87055 9.05353 4.51389 9.87357 4.28778C9.39271 5.27979 9.13604 6.37666 9.13604 7.5C9.13604 9.45304 9.91189 11.3261 11.2929 12.7071C12.6739 14.0881 14.547 14.864 16.5 14.864C17.6233 14.864 18.7202 14.6073 19.7122 14.1264C19.4861 14.9465 19.1295 15.7296 18.6518 16.4446C17.7727 17.7602 16.5233 18.7855 15.0615 19.391C13.5997 19.9965 11.9911 20.155 10.4393 19.8463C8.88743 19.5376 7.46197 18.7757 6.34315 17.6569C5.21447 16.538 4.4624 15.1126 4.15372 13.5607C3.84504 12.0089 4.00347 10.4003 4.60897 8.93853C5.21447 7.47672 6.23985 6.22729 7.55544 5.34824Z"
+                        fill="currentColor"></path>
+                    <path
+                        d="M19 2C19.5523 2 20 2.44772 20 3V4H21C21.5523 4 22 4.44772 22 5C22 5.55228 21.5523 6 21 6H20V7C20 7.55228 19.5523 8 19 8C18.4477 8 18 7.55228 18 7V6H17C16.4477 6 16 5.55228 16 5C16 4.44772 16.4477 4 17 4H18V3C18 2.44772 18.4477 2 19 2Z"
+                        fill="currentColor"></path>
+                </svg>
+            </button>
+        </span>
+    </div>
+</header>
+<!-- <a href="#" id="back-to-top" style="display: inline;"> ^ </a> -->
+
+<article class="mod-post mod-post__type-post">
+    <header>
+        <h1 class="mod-post__title">
+            关于
+        </h1>
+    </header>
+
+    <div class="mod-post__entry wzulli">
+        <p>= 清钰（日常用）<br />
+= 照水（FF14常驻id）</p>
+<p>长久以来的推</p>
+<p>在原守人 - TSUKIPRO<br />
+文月海 - 月歌。<br />
+美合月下 - PolaPoriPosuPo</p>
+<p>梦对象</p>
+<p>山姥切国广 - 刀剑乱舞<br />
+Lancet-2 - 明日方舟</p>
+<p>可能会产的品</p>
+<p>宗守 海隼 及各种三四角恋</p>
+<p>备注</p>
+<p>混乱中立派杂食<br />
+日常热爱爬墙，时常一常回家看看<br />
+人不拒我我不拒人主义<br />
+下面的内容很长了真的要看吗</p>
+<p>我的雷点</p>
+<p>一般是你不扫射我，我也没啥脾气可言</p>
+<p>CP 相关：始隼始 / 宗廉 / 三日鹤<br />
+对产品没意见，只是绕着走以防挨某些骂</p>
+<p>非常害怕过激人 / 小警察<br />
+问就也是一些过往的创伤</p>
+<p>用主控 / 皮套这类称呼的我会主动远离</p>
+<p>mhy 相关不介意我骂就行<br />
+xz/mxtx 相关二次元懂得都懂</p>
+<p>非 ally 顺直男为主的群体不要来：<br />
+这里没有你想看的东西</p>
+<p>可能会把你雷到的</p>
+<p>杂食乱炖拆 cp 啥都干<br />
+会有对过激洁癖的 ptsd 发言</p>
+<p>精神状态不太稳定的家里蹲<br />
+已老实已好好吃药拒绝咖啡因<br />
+反正对外又几乎没啥攻击性<br />
+让让我呗让我修复一下生存逻辑再出来</p>
+<p>有少部分时事浓度<br />
+但太热的一般逆反心理懒得转发</p>
+<p>立场偏向于念经派马主义女权<br />
+比较偏向于女性波动和泛性浪漫取向<br />
+其他的不确定主要是性单恋总是犯了（</p>
+<p>会用 AI 辅助翻译<br />
+对 AI 立场相对骑墙</p>
+<p>（本人计软专业，很久之前就在关注自然语言处理<br />
+兴趣在语音识别，不想被网上吵架 AOE）</p>
+<p>几乎所有游戏都当单机打成就打图鉴<br />
+基本上自觉远离游戏社区，很少在意节奏</p>
+<p>容忍度挺高但是有自己的底线</p>
+<p>下面的内容很长了真的要看吗</p>
+<p>实在是太多坑了之泛音企报菜名</p>
+<p>​月普罗​：16 年至今，爱过了恨过了现在搞一天是一天<br />
+前辈推海后辈推mori，dd 过凰香Dia<br />
+产品除了白年长/宗守还偶尔捡口海始/孝凰<br />
+偶尔整点宗守空三角/斩心为主宗守廉三角<br />
+胃口非常好就是天天喊饿</p>
+<p>饿死：太神乐入的坑，二代出来跑的路<br />
+推过​阿多/飒/敬/puka​，主要是追忆五六相关<br />
+对 hekk 已经是气笑了的看乐子状态</p>
+<p>娜：好感​1/2/6/8​，除此之外也没啥多余的感情</p>
+<p>大肉包：推过rio/山田三郎<br />
+恍惚记得爱看摩托车内销但太久远了</p>
+<p>On Air！：青柳帝是我不靠谱的大哥<br />
+见明佐和是我靠谱的大哥<br />
+当年打这游戏一点日语不懂忙着拜大哥了</p>
+<p>阿三：皆木缀/三好一成<br />
+顺手捡一口产品结果一直看不懂生态</p>
+<p>塞的满：看完动画平等地喜欢每一位眼镜</p>
+<p>Dreaming：​志部谷幽​。纯看脸d的<br />
+我玩了两下游戏觉得不好玩，又不懂日语就走了</p>
+<p>男邦：看脸d的若草葵<br />
+动画看了等于忘了<br />
+不过还是对风雷很有好感的</p>
+<p>plpr：美合月下<br />
+目前拉磨最多的企，主要是冷得怜爱了＆剧情对胃口<br />
+好感akr/romeo<br />
+产品鲇泽骨&gt;鼓手组cb</p>
+<p>winbo：18还是19年人设刚出就相中俩粉毛<br />
+游戏出了作为 oa 遗民伤心得没敢玩<br />
+好不容易玩了半年就关服了，这也莞莞类卿<br />
+但我还是惦记</p>
+<p>新世界狂欢：听二枚贝们和柊三太的<br />
+网络不好就走了</p>
+<p>pl：声优厨纯来听 cozmez 和 visty</p>
+<p>ll：还没正经搞二刺螈就玩过，推园田海未<br />
+恍惚记得嗑过绘海希三角，给点我还吃</p>
+<p>山药酸菜：三峰结华/浅仓透<br />
+其实我吃透円的氛围感但我躲着宅男走</p>
+<p>邦：花园多惠/大和麻弥<br />
+对新团都不感兴趣</p>
+<p>烤：日野森志步<br />
+纯喜欢音游手感和绿眼睛，懒得登陆</p>
+<p>刀：梦对象山姥切国广<br />
+设定是已婚分居偶尔一见面，不是什么正经梦女抱歉<br />
+搞过一点儿三山，不是一个世界线对我来说就行<br />
+另外推信浓藤四郎/千代金丸/丙子椒林剑</p>
+<p>吹：一般通过看脸d的鹿礼光/白光琉衣<br />
+主要从互关的口中了解，网络不好就算了</p>
+<p>乙游和ADV相关</p>
+<p>其实可以直接看 VNDB：https://vndb.org/u273120<br />
+说实话这部分只是记录一些全通情况和好感角色</p>
+<p>国乙部分</p>
+<p>四大国乙都打过一天到一年不等，均已跑路<br />
+比较久的是在绘旅人推过路辰</p>
+<p>拉萌家的连载：<br />
+神仙记事录：符德 月影别墅：白艾为主</p>
+<p>steam 单机买断：<br />
+目盲：方辰秩<br />
+潮 一九二七：尼基塔<br />
+与君盟：大概是施夷光吧……</p>
+<p>√瓶中琉璃海 √异世界的雪与奇迹</p>
+<p>日乙部分</p>
+<p>薄樱鬼：山南敬助/相马主计<br />
+剑为君舞：缘/九十九丸<br />
+黑蝶幻境：鸦翅（准确说的话阿明……？）<br />
+华族：刚打完勇线<br />
+JJ：刚打完neji线</p>
+<p>√大正×对称爱丽丝 √副作用之瞳 √灰鹰幻境 √我的超级现充生活 √像素男友<br />
+√純正優男</p>
+<p>菠萝向</p>
+<p>Lamento：都挺喜欢的，最喜欢ost（？<br />
+sweet pool：时至如今别的都忘了就记得Miracles May我哇哇哭<br />
+Slow Damage：打了一半，感想是赞美柊三太<br />
+剩下两作有缘分再补吧</p>
+<p>鬼畜眼镜：个人喜欢片桐线<br />
+热砂乐园：我是来当声优厨的<br />
+奇迹笔记本：正臣线</p>
+<p>旧书店街的桥姬：我理智上喜欢水玉线情感上喜欢川玉线</p>
+<p>百合向</p>
+<p>聆花几部曲我忘了：√寄甡 其他的还在打</p>
+<p>Galgame</p>
+<p>打了一半的Riddle Joker可以吗，很喜欢学姐</p>
+<p>一般向的记录一下全通情况</p>
+<p>√海沙风云 √圣歌德嘉的晚钟 √十三机兵防卫圈（放在这里吗……）</p>
+<p>魔法使之夜在打了在打了（搁置</p>
+<p>剩下的我有空补吧</p>
+<p>以外的游戏</p>
+<p>二游之 FGO：型月入门是fsf（被声优害了<br />
+目前惦记山南敬助/理查一世/杰基尔＆海德/男女团长<br />
+此游各种眼镜角色对我眼睛非常好</p>
+<p>二游之舟：PA4/Lancet-2/麦哲伦/慑砂/贾维<br />
+蓝绿色系的萌萌小女孩和红发男人都有一点儿好感<br />
+退坑回来不关注官方和剧情了安心做声优厨</p>
+<p>红烧天堂：对两位眼镜很感兴趣</p>
+<p>酥油：图花图中心，大部分产都能吃口<br />
+对除了自家之外的社区没有任何关注和认知</p>
+<p>网游之狒：除了PVP什么都涉猎一点儿<br />
+大部分时间 打舞者/肝生采<br />
+角色喜欢露琪亚/湛水</p>
+<p>网游之燕：对不起我是饿昏了的史同女来捡五代十国的<br />
+不然我还能上哪儿捡啊谁给我指个路<br />
+对其他所有都完全不关心</p>
+<p>单机游戏文字ADV是舒适区，其次模拟类<br />
+P 设游戏HOI4入坑，主要打 CK2→3，也菜菜的<br />
+我也懒得报steam菜名了总之随机刷新</p>
+<p>音游熟练度cy2＞phi＞mai＞暮色大师＞太鼓＞arc<br />
+当年也没咋多练现在更是懒得复健了<br />
+曲师喜欢Frums/tezuka</p>
+<p>其他的一些属性</p>
+<p>追番情况：https://bangumi.tv/user/671863<br />
+很久很久不追新番了，偶尔拣点旧的看</p>
+<p>术力口听民族调稍多<br />
+主要在听一滴p/干活p/天丛云p</p>
+<p>商业bl漫画口味：腰乃/森世/奏岛yuko/白桃noriko<br />
+本来想说乙抓口味→华山驯田，但我听他 BL 更多一点</p>
+<p>声优厨：羽多野涉/石上静香/小野友树/中岛yoshiki<br />
+前推偶尔一听：前野智昭/小林裕介/笹沼晃<br />
+赞美 n+c 社选我俩推配主角一辈子</p>
+<p>史同女发力了：<br />
+​吕琦​（五代十国一个大臣）/姜夔/舒伯特<br />
+产品目前简嗑一下​明庄/佐美​，年少时分搞过政丹<br />
+后唐/宋初皇室家庭伦理剧受害者</p>
+<p>韩表：好感二许<br />
+我也很好奇我怎么会跑到这来（于是大口蹭饭</p>
+<p>明清小说阅读量不多，偶尔一涉猎艳情小说<br />
+好感：镜花缘→唐小山/阴若花/林婉如三人组<br />
+红楼→尤三姐 水浒→石秀/张顺 三国→徐庶/姜维</p>
+<p>武侠小说的话只看过全套金庸和大部分古龙<br />
+金→书剑：芷桐 倚天：山素 古→风四娘沈璧君/俞佩玉</p>
+<p>大概还会有一些文具手账观鸟语言学之类的成分，纯属路过<br />
+兴趣爱好太广泛了我自己都记不得那么许多</p>
+
+    </div>
+
+</article>
+
+
+
+<footer id="footer" class="footer">
+    <nav>
+        
+        
+        <a class="menu-item" href="/">首页</a>
+        
+         · 
+        <a class="menu-item" href="/post">博客</a>
+        
+         · 
+        <a class="menu-item" href="/memos">闪念</a>
+        
+         · 
+        <a class="menu-item" href="/archives">归档</a>
+        
+         · 
+        <a class="menu-item" href="/tags">标签</a>
+        
+         · 
+        <a class="menu-item" href="/links">友链</a>
+        
+         · 
+        <a class="menu-item" href="/post/about">关于</a>
+        
+    </nav>
+
+    <div class="Copyright">Copyright &copy; <span class="current-year"></span> <a href="https://arsenides.github.io">Gridea Pro</a></div>
+    <script>document.querySelector('.current-year').textContent = new Date().getFullYear();</script>
+
+    <div class="index_footer">
+        Powered by Gridea Pro ·
+        <a class="rss" href="/feed.xml" target="_blank" rel="noopener noreferrer">
+            <i class="ri-rss-line"></i>RSS
+        </a>
+    </div>
+</footer>
+
+
+
+    
+
+    
+<script>console.log("\n%c ✦ Gridea Pro v1.2.2 %c · Theme: amore-jinja2 v1.1.0 · https://gridea.pro %c\n","color:#fadfa3;background:#111111;padding:9px 14px;border-radius:4px 0 0 4px;font-weight:500;font-size:12px","color:#e05c00;background:#fff3ec;padding:9px 14px;border-radius:0 4px 4px 0;font-size:11px","")</script>
+</body>
+
+</html>
