@@ -13,7 +13,7 @@
 <meta name="theme-color" content="#292a2d" media="(prefers-color-scheme: dark)">
 
 
-<link rel="shortcut icon" href="/media/images/favicon.ico">
+<link rel="shortcut icon" href="/images/theme/icon.png">
 <link rel="stylesheet" href="/styles/main.min.css">
 
 
@@ -80,7 +80,7 @@
                 return 'light';
             };
 
-            const configDefault = 'dark';
+            const configDefault = 'light';
             const currentTheme = window.localStorage && window.localStorage.getItem('theme');
             const initialTheme = currentTheme || configDefault || getSystemTheme();
             const isDark = initialTheme === 'dark';
@@ -244,6 +244,27 @@
 
 
 
+<style>@import url("https://cdn.jsdelivr.net/npm/@callmebill/lxgw-wenkai-web@latest/style.css");
+
+/* 除图标(ri-)外，所有元素改用霞鹜文楷 */
+*:not([class*="ri-"]) {
+  font-family: "LXGW WenKai", "Microsoft YaHei", "PingFang SC", sans-serif !important;
+}
+
+/* 归档年份（主题自带 !important，单独覆盖） */
+.mod-archive__year {
+  font-family: "LXGW WenKai", "Microsoft YaHei", "PingFang SC", sans-serif !important;
+}
+
+/* 代码块改用霞鹜文楷等宽 */
+pre, code, pre *, code * {
+  font-family: "LXGW WenKai Mono", "Courier New", Consolas, Monaco, monospace !important;
+}
+
+/* 正文基准 18px，em 元素按比例放大、保留层级 */
+html { font-size: 18px; }
+body { font-size: 1rem; line-height: 1.8; }</style>
+
     <meta name="generator" content="Gridea Pro 1.2.2">
     <title>闪念 | 企鹅岛</title>
 
@@ -276,7 +297,7 @@
             return 'light';
         };
 
-        const configDefault = 'dark';
+        const configDefault = 'light';
         const savedTheme = localStorage.getItem('theme');
         const theme = savedTheme || configDefault || getSystemTheme();
 
@@ -294,7 +315,7 @@
         <div class="mod-head__logo">
             <a href="/">
                 
-                <img class="avatar" alt="avatar" src="/images/avatar.png">
+                <img class="avatar" alt="avatar" src="/images/theme/icon.png">
                 
             </a>
         </div>
