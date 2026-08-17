@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8" />
+<meta name="viewport"
+    content="initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, width=device-width" />
+<meta name="renderer" content="webkit">
+<meta name="format-detection" content="telephone=no, email=no, address=no">
+
+
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#292a2d" media="(prefers-color-scheme: dark)">
+
+
+<link rel="shortcut icon" href="/images/theme/icon.png">
+<link rel="stylesheet" href="/styles/main.min.css">
+
+
+<style>:root{--accent-color:#12AA9C;}</style>
+
+
+<script>
+    // 自动为所有 target="_blank" 的链接添加 rel="noopener noreferrer"
+    document.addEventListener('DOMContentLoaded', function () {
+        var links = document.querySelectorAll('a[target="_blank"]');
+        links.forEach(function (link) {
+            var rel = link.getAttribute('rel') || '';
+            if (rel.indexOf('noopener') === -1) {
+                rel += ' noopener';
+            }
+            if (rel.indexOf('noreferrer') === -1) {
+                rel += ' noreferrer';
+            }
+            link.setAttribute('rel', rel.trim());
+        });
+    });
+</script>
+
+<script>
+    // declaraction of document.ready() function.
+    (function () {
+        var ie = !!(window.attachEvent && !window.opera);
+        var wk = /webkit\/(\d+)/i.test(navigator.userAgent) && (RegExp.$1 < 525);
+        var fn = [];
+        var run = function () {
+            for (var i = 0; i < fn.length; i++) fn[i]();
+        };
+        var d = document;
+        d.ready = function (f) {
+            if (!ie && !wk && d.addEventListener)
+                return d.addEventListener('DOMContentLoaded', f, false);
+            if (fn.push(f) > 1) return;
+            if (ie)
+                (function () {
+                    try {
+                        d.documentElement.doScroll('left');
+                        run();
+                    } catch (err) {
+                        setTimeout(arguments.callee, 0);
+                    }
+                })();
+            else if (wk)
+                var t = setInterval(function () {
+                    if (/^(loaded|complete)$/.test(d.readyState))
+                        clearInterval(t), run();
+                }, 0);
+        };
+    })();
+
+
+    document.ready(
+        function () {
+            var _Blog = window._Blog || {};
+
+            const getSystemTheme = () => {
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    return 'dark';
+                }
+                return 'light';
+            };
+
+            const configDefault = 'light';
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme');
+            const initialTheme = currentTheme || configDefault || getSystemTheme();
+            const isDark = initialTheme === 'dark';
+
+            const updateButtons = (dark) => {
+                const sunBtn = document.getElementById("theme-toggle-sun");
+                const moonBtn = document.getElementById("theme-toggle-moon");
+                const mobileSunBtn = document.getElementById("mobile-theme-toggle-sun");
+                const mobileMoonBtn = document.getElementById("mobile-theme-toggle-moon");
+
+                if (dark) {
+                    if (sunBtn) sunBtn.style.display = 'none';
+                    if (moonBtn) moonBtn.style.display = 'inline-block';
+                    if (mobileSunBtn) mobileSunBtn.style.display = 'none';
+                    if (mobileMoonBtn) mobileMoonBtn.style.display = 'inline-block';
+                } else {
+                    if (sunBtn) sunBtn.style.display = 'inline-block';
+                    if (moonBtn) moonBtn.style.display = 'none';
+                    if (mobileSunBtn) mobileSunBtn.style.display = 'inline-block';
+                    if (mobileMoonBtn) mobileMoonBtn.style.display = 'none';
+                }
+            };
+
+            const updateThemeColor = (dark) => {
+                const themeColor = dark ? '#292a2d' : '#ffffff';
+                const metaTags = document.querySelectorAll('meta[name="theme-color"]');
+                if (metaTags.length > 0) {
+                    // 保留第一个，移除其他的，避免重复
+                    for (let i = 1; i < metaTags.length; i++) {
+                        metaTags[i].remove();
+                    }
+                    metaTags[0].setAttribute('content', themeColor);
+                    metaTags[0].removeAttribute('media');
+                } else {
+                    const meta = document.createElement('meta');
+                    meta.name = 'theme-color';
+                    meta.content = themeColor;
+                    document.head.appendChild(meta);
+                }
+            };
+
+            const applyTheme = (dark) => {
+                const body = document.getElementsByTagName('body')[0];
+                if (dark) {
+                    body.classList.add('dark-theme');
+                } else {
+                    body.classList.remove('dark-theme');
+                }
+                updateButtons(dark);
+                updateThemeColor(dark);
+            };
+
+            // Initial application
+            applyTheme(isDark);
+            if (!currentTheme) {
+                window.localStorage && window.localStorage.setItem('theme', initialTheme);
+            }
+
+            _Blog.toggleTheme = function () {
+                const toggleFunc = (e) => {
+                    // Prevent bubbling if needed, though buttons are distinct now
+                    if (e) e.stopPropagation();
+
+                    const body = document.getElementsByTagName('body')[0];
+                    const isCurrentlyDark = body.classList.contains('dark-theme');
+
+                    if (isCurrentlyDark) {
+                        body.classList.remove('dark-theme');
+                        updateButtons(false);
+                        window.localStorage && window.localStorage.setItem('theme', 'light');
+                    } else {
+                        body.classList.add('dark-theme');
+                        updateButtons(true);
+                        window.localStorage && window.localStorage.setItem('theme', 'dark');
+                    }
+                };
+
+                const sunBtn = document.getElementById("theme-toggle-sun");
+                const moonBtn = document.getElementById("theme-toggle-moon");
+                const mobileSunBtn = document.getElementById("mobile-theme-toggle-sun");
+                const mobileMoonBtn = document.getElementById("mobile-theme-toggle-moon");
+
+                if (sunBtn) sunBtn.addEventListener('click', toggleFunc);
+                if (moonBtn) moonBtn.addEventListener('click', toggleFunc);
+                if (mobileSunBtn) mobileSunBtn.addEventListener('click', toggleFunc);
+                if (mobileMoonBtn) mobileMoonBtn.addEventListener('click', toggleFunc);
+            };
+            _Blog.toggleTheme();
+
+            if (window.matchMedia && !configDefault) {
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+                    const newTheme = e.matches ? 'dark' : 'light';
+                    applyTheme(e.matches);
+                    window.localStorage && window.localStorage.setItem('theme', newTheme);
+                });
+            }
+        }
+    );
+</script>
+
+<script>
+    // Reading Progress Component
+    document.addEventListener('DOMContentLoaded', () => {
+        const progressValue = document.querySelector('.reading-value');
+        const progressCircle = document.querySelector('.progress-ring__circle');
+        const container = document.querySelector('.reading-progress-container');
+
+        // Exit if elements don't exist (e.g., not on a post page)
+        if (!progressValue || !progressCircle || !container) {
+            return;
+        }
+
+        // SVG Circle setup
+        const radius = progressCircle.r.baseVal.value;
+        const circumference = 2 * Math.PI * radius;
+
+        progressCircle.style.strokeDasharray = `${circumference} ${circumference}`;
+        progressCircle.style.strokeDashoffset = circumference;
+
+        function setProgress(percent) {
+            const safePercent = Math.min(100, Math.max(0, percent));
+            progressValue.textContent = `${Math.round(safePercent)}%`;
+            const offset = circumference - (safePercent / 100) * circumference;
+            progressCircle.style.strokeDashoffset = offset;
+        }
+
+        function onScroll() {
+            const scrollTop = window.scrollY || document.documentElement.scrollTop;
+            const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+
+            if (scrollHeight <= 0) {
+                setProgress(0);
+                return;
+            }
+
+            const scrollPercent = (scrollTop / scrollHeight) * 100;
+            setProgress(scrollPercent);
+
+            // Show/Hide logic: Show if scrolled more than 100px
+            if (scrollTop > 100) {
+                container.classList.add('show');
+            } else {
+                container.classList.remove('show');
+            }
+        }
+
+        // Initialize
+        onScroll();
+
+        // Listen for scroll events
+        window.addEventListener('scroll', onScroll, { passive: true });
+
+        // Recalculate on resize
+        window.addEventListener('resize', onScroll);
+    });
+</script>
+
+
+
+
+
+
+
+<style>@import url("https://cdn.jsdelivr.net/npm/@callmebill/lxgw-wenkai-web@latest/style.css");
+
+/* 除图标(ri-)外，所有元素改用霞鹜文楷 */
+*:not([class*="ri-"]) {
+  font-family: "LXGW WenKai", "Microsoft YaHei", "PingFang SC", sans-serif !important;
+}
+
+/* 归档年份（主题自带 !important，单独覆盖） */
+.mod-archive__year {
+  font-family: "LXGW WenKai", "Microsoft YaHei", "PingFang SC", sans-serif !important;
+}
+
+/* 代码块改用霞鹜文楷等宽 */
+pre, code, pre *, code * {
+  font-family: "LXGW WenKai Mono", "Courier New", Consolas, Monaco, monospace !important;
+}
+
+/* 正文基准 18px，em 元素按比例放大、保留层级 */
+html { font-size: 18px; }
+body { font-size: 1rem; line-height: 1.8; }</style>
+
+    <meta name="generator" content="Gridea Pro 1.2.2">
+    <title>【文章翻译】归于水 - tezuka | 企鹅岛</title>
+
+    
+<meta name="description" content="原作：https://novema.jp/book/n1779656 翻译：文译 by DeepSeek 校对：行云共舟 #高中生# #BL# #幽灵# #灵异# #背叛# #恐怖BL# #青春BL# #青春# #祭品# #夏# 高中二年级的暑假。 六人踏入的、封闭的旧校舍。 那时，我们只是打算去试胆。 视频社团的六人好友组听说了有学生在泳池死掉的传闻，计划在四年&amp;hellip;">
+<link rel="canonical" href="https://arsenides.github.io/post/cLRFdI/">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"【文章翻译】归于水 - tezuka","url":"https://arsenides.github.io/post/cLRFdI/","description":"原作：https://novema.jp/book/n1779656 翻译：文译 by DeepSeek 校对：行云共舟 #高中生# #BL# #幽灵# #灵异# #背叛# #恐怖BL# #青春BL# #青春# #祭品# #夏# 高中二年级的暑假。 六人踏入的、封闭的旧校舍。 那时，我们只是打算去试胆。 视频社团的六人好友组听说了有学生在泳池死掉的传闻，计划在四年\u0026hellip;","datePublished":"2026-08-17T10:34:11Z","dateModified":"2026-08-17T10:34:11Z","author":{"@type":"Person","name":"企鹅岛"},"publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"/images/avatar.png"},"name":"企鹅岛"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","item":"https://arsenides.github.io","name":"企鹅岛","position":1},{"@type":"ListItem","item":"https://arsenides.github.io/post/cLRFdI/","name":"【文章翻译】归于水 - tezuka","position":2}]}</script>
+<meta property="og:title" content="【文章翻译】归于水 - tezuka">
+<meta property="og:description" content="原作：https://novema.jp/book/n1779656 翻译：文译 by DeepSeek 校对：行云共舟 #高中生# #BL# #幽灵# #灵异# #背叛# #恐怖BL# #青春BL# #青春# #祭品# #夏# 高中二年级的暑假。 六人踏入的、封闭的旧校舍。 那时，我们只是打算去试胆。 视频社团的六人好友组听说了有学生在泳池死掉的传闻，计划在四年&amp;hellip;">
+<meta property="og:url" content="https://arsenides.github.io/post/cLRFdI/">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="企鹅岛">
+<meta property="og:image" content="/images/avatar.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:url" content="https://arsenides.github.io/post/cLRFdI/">
+<meta name="twitter:title" content="【文章翻译】归于水 - tezuka">
+<meta name="twitter:description" content="原作：https://novema.jp/book/n1779656 翻译：文译 by DeepSeek 校对：行云共舟 #高中生# #BL# #幽灵# #灵异# #背叛# #恐怖BL# #青春BL# #青春# #祭品# #夏# 高中二年级的暑假。 六人踏入的、封闭的旧校舍。 那时，我们只是打算去试胆。 视频社团的六人好友组听说了有学生在泳池死掉的传闻，计划在四年&amp;hellip;">
+<meta name="twitter:image" content="/images/avatar.png">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#12AA9C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="企鹅岛">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/icons/icon-180x180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/images/icons/icon-192x192.png">
+<meta name="msapplication-TileColor" content="#12AA9C">
+<meta name="msapplication-TileImage" content="/images/icons/icon-192x192.png">
+<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js')}</script>
+</head>
+
+<body class="">
+
+    
+<script>
+    (function () {
+        const getSystemTheme = () => {
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                return 'dark';
+            }
+            return 'light';
+        };
+
+        const configDefault = 'light';
+        const savedTheme = localStorage.getItem('theme');
+        const theme = savedTheme || configDefault || getSystemTheme();
+
+        if (theme === 'dark') {
+            document.body.classList.add('dark-theme');
+        }
+
+        if (!savedTheme) {
+            localStorage.setItem('theme', theme);
+        }
+    })();
+</script>
+<header class="mod-head">
+    <div class="mod-head__left">
+        <div class="mod-head__logo">
+            <a href="/">
+                
+                <img class="avatar" alt="avatar" src="/images/theme/icon.png">
+                
+            </a>
+        </div>
+    </div>
+
+    <div class="mod-head__right">
+        <span>
+            <button id="theme-toggle-sun" class="tiptap-button theme-toggle-sun" aria-label="Switch to dark mode">
+                <svg width="18" height="18" class="tiptap-button-icon" viewBox="0 0 24 24" fill="currentColor"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M12 1C12.5523 1 13 1.44772 13 2V4C13 4.55228 12.5523 5 12 5C11.4477 5 11 4.55228 11 4V2C11 1.44772 11.4477 1 12 1Z"
+                        fill="currentColor"></path>
+                    <path fill-rule="evenodd" clip-rule="evenodd"
+                        d="M7 12C7 9.23858 9.23858 7 12 7C14.7614 7 17 9.23858 17 12C17 14.7614 14.7614 17 12 17C9.23858 17 7 14.7614 7 12ZM12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9Z"
+                        fill="currentColor"></path>
+                    <path
+                        d="M13 20C13 19.4477 12.5523 19 12 19C11.4477 19 11 19.4477 11 20V22C11 22.5523 11.4477 23 12 23C12.5523 23 13 22.5523 13 22V20Z"
+                        fill="currentColor"></path>
+                    <path
+                        d="M4.22282 4.22289C4.61335 3.83236 5.24651 3.83236 5.63704 4.22289L7.04704 5.63289C7.43756 6.02341 7.43756 6.65658 7.04704 7.0471C6.65651 7.43762 6.02335 7.43762 5.63283 7.0471L4.22282 5.6371C3.8323 5.24658 3.8323 4.61341 4.22282 4.22289Z"
+                        fill="currentColor"></path>
+                    <path
+                        d="M18.367 16.9529C17.9765 16.5623 17.3433 16.5623 16.9528 16.9529C16.5623 17.3434 16.5623 17.9766 16.9528 18.3671L18.3628 19.7771C18.7533 20.1676 19.3865 20.1676 19.777 19.7771C20.1675 19.3866 20.1675 18.7534 19.777 18.3629L18.367 16.9529Z"
+                        fill="currentColor"></path>
+                    <path
+                        d="M1 12C1 11.4477 1.44772 11 2 11H4C4.55228 11 5 11.4477 5 12C5 12.5523 4.55228 13 4 13H2C1.44772 13 1 12.5523 1 12Z"
+                        fill="currentColor"></path>
+                    <path
+                        d="M20 11C19.4477 11 19 11.4477 19 12C19 12.5523 19.4477 13 20 13H22C22.5523 13 23 12.5523 23 12C23 11.4477 22.5523 11 22 11H20Z"
+                        fill="currentColor"></path>
+                    <path
+                        d="M7.04704 16.9529C7.43756 17.3434 7.43756 17.9766 7.04704 18.3671L5.63704 19.7771C5.24651 20.1676 4.61335 20.1676 4.22282 19.7771C3.8323 19.3866 3.8323 18.7534 4.22283 18.3629L5.63283 16.9529C6.02335 16.5623 6.65651 16.5623 7.04704 16.9529Z"
+                        fill="currentColor"></path>
+                    <path
+                        d="M19.777 5.6371C20.1675 5.24657 20.1675 4.61341 19.777 4.22289C19.3865 3.83236 18.7533 3.83236 18.3628 4.22289L16.9528 5.63289C16.5623 6.02341 16.5623 6.65658 16.9528 7.0471C17.3433 7.43762 17.9765 7.43762 18.367 7.0471L19.777 5.6371Z"
+                        fill="currentColor"></path>
+                </svg>
+            </button>
+            <button id="theme-toggle-moon" class="tiptap-button theme-toggle-moon" aria-label="Switch to light mode">
+                <svg width="18" height="18" class="tiptap-button-icon" viewBox="0 0 24 24" fill="currentColor"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" clip-rule="evenodd"
+                        d="M12 2C10.0222 2 8.08879 2.58649 6.4443 3.6853C4.79981 4.78412 3.51809 6.3459 2.76121 8.17317C2.00433 10.0004 1.8063 12.0111 2.19215 13.9509C2.578 15.8907 3.53041 17.6725 4.92894 19.0711C6.32746 20.4696 8.10929 21.422 10.0491 21.8079C11.9889 22.1937 13.9996 21.9957 15.8268 21.2388C17.6541 20.4819 19.2159 19.2002 20.3147 17.5557C21.4135 15.9112 22 13.9778 22 12C22 11.5955 21.7564 11.2309 21.3827 11.0761C21.009 10.9213 20.5789 11.0069 20.2929 11.2929C19.287 12.2988 17.9226 12.864 16.5 12.864C15.0774 12.864 13.713 12.2988 12.7071 11.2929C11.7012 10.287 11.136 8.92261 11.136 7.5C11.136 6.07739 11.7012 4.71304 12.7071 3.70711C12.9931 3.42111 13.0787 2.99099 12.9239 2.61732C12.7691 2.24364 12.4045 2 12 2ZM7.55544 5.34824C8.27036 4.87055 9.05353 4.51389 9.87357 4.28778C9.39271 5.27979 9.13604 6.37666 9.13604 7.5C9.13604 9.45304 9.91189 11.3261 11.2929 12.7071C12.6739 14.0881 14.547 14.864 16.5 14.864C17.6233 14.864 18.7202 14.6073 19.7122 14.1264C19.4861 14.9465 19.1295 15.7296 18.6518 16.4446C17.7727 17.7602 16.5233 18.7855 15.0615 19.391C13.5997 19.9965 11.9911 20.155 10.4393 19.8463C8.88743 19.5376 7.46197 18.7757 6.34315 17.6569C5.21447 16.538 4.4624 15.1126 4.15372 13.5607C3.84504 12.0089 4.00347 10.4003 4.60897 8.93853C5.21447 7.47672 6.23985 6.22729 7.55544 5.34824Z"
+                        fill="currentColor"></path>
+                    <path
+                        d="M19 2C19.5523 2 20 2.44772 20 3V4H21C21.5523 4 22 4.44772 22 5C22 5.55228 21.5523 6 21 6H20V7C20 7.55228 19.5523 8 19 8C18.4477 8 18 7.55228 18 7V6H17C16.4477 6 16 5.55228 16 5C16 4.44772 16.4477 4 17 4H18V3C18 2.44772 18.4477 2 19 2Z"
+                        fill="currentColor"></path>
+                </svg>
+            </button>
+        </span>
+    </div>
+</header>
+<!-- <a href="#" id="back-to-top" style="display: inline;"> ^ </a> -->
+
+<article class="mod-post mod-post__type-post">
+    <header>
+        <h1 class="mod-post__title">
+            【文章翻译】归于水 - tezuka
+        </h1>
+    </header>
+
+    <div class="mod-post__meta">
+        <time datetime="2026-08-17">
+            2026-08-17
+        </time> • 13 分钟阅读 •
+         </div>
+
+
+
+            <div class="mod-post__entry wzulli">
+                
+                <p>原作：https://novema.jp/book/n1779656<br />
+翻译：文译 by DeepSeek<br />
+校对：行云共舟</p>
+<p>#高中生# #BL# #幽灵# #灵异# #背叛# #恐怖BL# #青春BL# #青春# #祭品# #夏#</p>
+<p>高中二年级的暑假。<br />
+六人踏入的、封闭的旧校舍。<br />
+那时，我们只是打算去试胆。</p>
+<p>视频社团的六人好友组听说了有学生在泳池死掉的传闻，计划在四年前封闭的旧校舍拍摄灵异视频。<br />
+旧校舍中充满了与“水”有关的异变。<br />
+就在探索即将结束之际，开始一个接一个地消失。</p>
+<p>在夏日中浓密地描绘丧失的后悔与无法斩断的共依存，少年们的青春故事。</p>
+<p>“既恐怖又珍贵”，这是为青春恐怖BL大奖而创作的新作！<br />
+在连喜欢恐怖的人也能接受的恐怖剧本基础上，细致地展开关系性的Boys Life。<br />
+在最后部分爆发性地塞满了性癖。<br />
+拼了命地推敲，从头到尾彻底消除矛盾和违和感，并埋下了伏笔。<br />
+请务必读到最后。</p>
+<p>新绘插图：黑铅老师</p>
+<p><strong>梗概</strong></p>
+<p>高中二年级的暑假。<br />
+六人踏入的、封闭的旧校舍。<br />
+那时，我们只是打算去试胆。</p>
+<p>视频社团的六人好友组听说了有学生在泳池死掉的传闻，计划在四年前封闭的旧校舍拍摄灵异视频。<br />
+旧校舍中充满了与“水”有关的异变。<br />
+就在探索即将结束之际，开始一个接一个地消失。</p>
+<p>浓密地描绘丧失的后悔与无法斩断的共依存，少年们的青春故事。</p>
+<h1 id="-">第一章 仍在夏日途中</h1>
+<p>水从水龙头落下，敲打着灰暗的水槽底部。<br />
+冬马注视了片刻。目光追着透明的水线被排水口吸入，同时察觉到只有指尖莫名冰冷。八月的厨房闷热潮湿。换气扇虽然在转，空气仍沉甸甸地黏附在身上，窗外蝉鸣不止。只有触着水的右手一直暖和不起来。<br />
+望着排水口那漆黑的洞时，偶尔会觉得，有什么东西从底部回望着自己。<br />
+他告诉自己这是错觉。说这是常有的事。<br />
+他关掉水龙头。一边用毛巾擦手一边拿起手机，社团的群聊正活跃着。</p>
+<p>——今天去活动室吗？<br />
+——热死了。<br />
+——请吃冰淇淋。<br />
+——才不请。</p>
+<p>无聊的对话从上午一直持续着。手机屏幕角落的天气应用显示“34℃”。<br />
+暑假的正中。八月中旬。这是没有安排的高中男生们，仅仅为了找个聚在一起的理由而进行的对话。<br />
+冬马只简短地回了句“去”，便出了门。<br />
+一出门，沥青路面的反光刺眼。天空是接近白色的浅蓝，几乎没有云，空气本身带着热量黏附在皮肤上。自行车的车座热得无法赤手触摸，车把的橡胶也软化了。铺上毛巾后跨上去，踩下踏板。蹬出去的瞬间，额头滴下了汗。<br />
+书包里的瓶装水轻轻晃动。</p>
+<p>活动楼二楼，那间被借作新闻部活动室的视听准备室里，已经聚了四个人。<br />
+窗边的折叠椅上，朔夜伸着腿；他对面，阳翔像要把摄像机拆开似的摆弄着；黑板对面墙边整理过的桌子上，旭像个傻瓜一样仰面朝天躺着。这三个都是和冬马同年级的高二学生。<br />
+躺着的旭旁边，那坐在椅子上摆弄手机的，是今年春天刚入学的一年级生凑。<br />
+风扇虽然姑且开着，但只有正对着的中间一带凉意温吞，房间角落几乎和外面没什么两样。窗边尤其严重，即使拉紧窗帘，阳光的热度仍透过布料传进来。昏暗之中，只有从窗缝射入的阳光形成白色光柱，尘埃在光中漂浮游动。旭的额头和阳翔的手臂都渗出了汗，整个活动室弥漫着仿佛将谁的体温淡淡融化了一般的温吞热气。<br />
+“好慢啊。”<br />
+旭躺着说道。冬马回了一句“我不是刚说十分钟前出门的吗”，凑便抬起头，规规矩矩地低头行礼：“冬马前辈，你好。”<br />
+朔夜什么也没说，从放在脚边的保冷袋里取出瓶装运动饮料，朝冬马扔了过来。冬马单手接住。好冰。瓶身结露弄湿了手。<br />
+“谢谢。”<br />
+“嗯。”<br />
+仅此而已。朔夜已经一手拿着罐装咖啡，目光重新回到窗外。冬马犹豫了一下，然后在他旁边坐下。明明有其他空椅子，却自然而然地选择了朔夜身边。<br />
+“你俩都成老夫老妻了吧。”<br />
+旭望着天花板笑了。<br />
+“吵死了。”朔夜回道。<br />
+“好啦好啦，别害羞别害羞。”旭笑嘻嘻地说。<br />
+“想挨揍啊。”<br />
+稍稍有些恼火的朔夜，让凑哧哧地笑了起来。阳翔一边拆着什么东西上的螺丝，一边事不关己地说：“关系真好啊。”只有冬马没有任何反应，打开了刚才接过的瓶子。<br />
+就是这样的氛围。一直如此。<br />
+名义上是新闻部，但最后一次印报纸是什么时候，已经没人记得了。去年顾问老师退休后，就没有接手的老师，近来的活动专门就是帮阳翔热衷的视频投稿网站频道做事。<br />
+频道名字姑且算是有的，但订阅数只有三位数出头。只有阳翔一时兴起上传的“试着用自行车和伞飞上天”的短视频曾经小小地火了一把，之后其他视频播放量都是两位数。在学校里，顶多被称为“瞎胡闹的一帮人”，不多不少，仅此而已。<br />
+与其说是社团活动，不如说是关系好的人暑假里聚在一起的理由。对冬马来说，这里就是现在的容身之处。</p>
+<p>那么，今天要做什么吗？<br />
+旭问道。阳翔“啊，对了”地放下相机坐起身来。眼睛闪闪发亮。阳翔露出这种表情时，大多不会说出什么好事。<br />
+他掏出手机，把屏幕转向大家。<br />
+“看这个。昨天收到的私信。”<br />
+屏幕上显示着Twitter的私信。只有一条，是一段简短的文章。<br />
+——你们知道吗，旧校舍那起连续死亡事故，其实是霸凌中死在泳池的男学生的诅咒？<br />
+凑从后面探过头来，皱起了眉头。<br />
+“欸，这是什么呀。头像和简介都没有，关注数和粉丝数也都是零。好吓人啊。”<br />
+“太可疑了。”冬马也这样回应。<br />
+尽管听到两人的反应，阳翔依然满脸笑容。<br />
+“这个啊，叫做爆料。终于也到了会有爆料找上我们的时代了。”<br />
+旭吐槽道：“你的频道订阅者才三百人吧。”阳翔立刻纠正：“是三百一十二人。”阳翔便那样继续说了下去。<br />
+“四年前关闭的那个，不是有嘛。山那边的旧校舍。死了几个学生，什么水灾之类的，报纸上也登过的那个。”<br />
+旭坐起身来。“啊——，好像听说过。就是有诅咒之类传闻的那个？”<br />
+阳翔点了点头。<br />
+“对，说是最初死掉的学生下的诅咒什么的。然后其他学生也死了几个，校舍整个就关闭了。而且，听说马上就要开始拆除了。趁它消失之前去拍泳池什么的，绝对很有看头吧？夏天嘛。”<br />
+“那里，禁止入内吧。”<br />
+这个社团里唯一的三年级学生莲司一边擦着汗走进活动室，一边皱着眉说道。<br />
+阳翔立刻回应。<br />
+“所以才好啊。反正也听说要开始拆除了，又是夏天。”<br />
+莲司抱起胳膊。<br />
+“你要被可疑的私信勾引吗？”<br />
+“不是上钩，是顺势利用啊。”阳翔不肯退让。“试胆企划。正合适嘛，又是夏天。”<br />
+阳翔并不在意莲司为难的表情。旭跟着起哄：“不错嘛，感觉很有趣，夏天嘛！”凑虽然一脸不情愿地“欸——……”着，眼睛却微微发亮。想看恐怖事物的心理，在这个年纪与好奇心难以区分。<br />
+冬马依旧握着塑料瓶，脸上的笑容没有消失，只是稍稍垂下了眼睛。<br />
+因水灾死了学生的旧校舍。那个话题出现的瞬间，有什么冰冷的东西沉到了胸口深处。就像被丢进一颗小石子，呼吸稍稍变得沉重起来。但他没有表现在脸上，因为他觉得没必要给正在兴头上的对话泼冷水，只是稍稍垂下眼睛，描摹着运动饮料瓶上标签的接缝。<br />
+察觉到冬马这一变化的，只有朔夜。冬马感觉到身旁朔夜的目光向这边移动了一瞬。<br />
+“冬马，你怕水吧。”<br />
+朔夜说道。在这个社团里，大家多多少少知道冬马会微妙地避开与水有关的事物。约他去海边或泳池，他总是含糊地拒绝。下雨天他的情绪会有些低落。就是这种模糊的印象。<br />
+冬马稍微顿了顿，才开口。<br />
+“……没什么。我又不害怕。”<br />
+朔夜微微歪了歪头。<br />
+“要是讨厌就说出来。”<br />
+“没关系的。”<br />
+声音很平淡，塑料瓶表面的水滴顺着指缝滑落。<br />
+阳翔拍了拍手：“那就定了！”莲司提出了条件：“只限白天。晚上不行。”旭轻松地回应：“了解了解，夏天嘛！”阳翔回他：“别学我啊。”<br />
+凑一副快要哭出来的表情问道：“我也要去吗……？”但阳翔对他说：“没有你的话谁拿灯啊？让朔夜或冬马拿试试看，一不留神那两人就会不知道跑到哪里去。”凑只好不情愿地点了点头。<br />
+朔夜什么也没说，在冬马身旁喝着罐装咖啡，默默地听着事情敲定下来。</p>
+<p>走出活动室后，两人在自动贩卖机前独处。<br />
+其他四人先下了楼梯，只有冬马和朔夜留在活动楼后面。校舍后面的自动贩卖机位于背阴处，稍微好受一些。即便如此空气仍是温热的，背阴处也闷着热气。把背靠在混凝土墙上，积了热的墙面隔着衬衫灼烫着后背。蝉鸣实在过于喧嚣，反倒让两人的沉默清晰地浮现出来。<br />
+“不愿意的话就拒绝掉。”<br />
+朔夜说道。他按下按钮，取出掉落下来的麦茶塑料瓶，没有看冬马。<br />
+“太夸张了。我又没那么——”<br />
+朔夜打断了冬马的话。<br />
+“你从以前起，一牵涉到水就变得奇怪。”<br />
+简短而平静。<br />
+冬马微微笑了笑。他自己也明白那笑容很僵硬。<br />
+“我才不奇怪，水的事故本来就很可怕啊。”<br />
+“……”<br />
+朔夜有几秒钟像要说什么似的张了张嘴，随后看向冬马的眼睛，又稍稍移开了视线。<br />
+他拧开麦茶的瓶盖，喝了一口，“算了，随便你吧。”他停住了话头。<br />
+朔夜总是这样。他大概比任何人都更仔细地看着冬马。但是，他会在某处划下界线，不会越过那条线靠近。<br />
+从一开始就是这样。初中一年级的暑假结束后，朔夜看到冬马在教室角落呆呆地望着窗外，停下了脚步。他想，那是一双失去了什么的人的眼睛，那样的一张脸。和每天早上在镜子里看到的眼睛一样，和自己一样。朔夜问了句“出什么事了吗？”，冬马只是摇了摇头，他便没有再深入追问。从那以后三年多，朔夜一直待在冬马身边，却不曾触碰冬马的内心深处。<br />
+冬马看着朔夜的侧脸。汗让他的颈项泛着光。发梢在风中晃动。<br />
+“走吧。大家都在等着呢。”<br />
+冬马说完便迈步走了出去。朔夜稍稍落后一步跟了上来。并肩走着的两人之间，距离近得手臂会碰在一起。谁都没有避开。</p>
+<p>顺路去了趟便利店，买了冰淇淋。<br />
+六个人坐在停车场的路缘石上一起吃。莲司嘴上说着“真没规矩啊”，自己也坐了下来。眼前的县道上不时有车驶过。沥青的气味和开始融化的冰淇淋甜香混在一起。屁股下面的路缘石混凝土烫得像火烤一样。晒在阳光下的手臂皮肤火辣辣地疼，不到三十秒，冰淇淋棍上融化的甜液就顺着手腕淌了下来。<br />
+“话说，夏天还有一大半呢。”<br />
+阳翔叼着冰淇淋棍说道。<br />
+“暑假嘛，是做什么都会被原谅的时期吧。”<br />
+阳翔继续说道。莲司回他“怎么可能被原谅”，凑一脸认真地回“不良行为可不会被原谅”，逗得大家笑了起来。<br />
+“明天那个企划，要是真的很可怕怎么办？”<br />
+阳翔问道。旭即答“真会死”，凑即答“我会哭”。<br />
+“冬马呢？”阳翔转过头问。<br />
+冬马装出稍微想了想的样子，回答“逃跑”。<br />
+“朔夜呢？”阳翔接着问。<br />
+朔夜吃着冰淇淋，稍微顿了一下才回答。<br />
+“我也逃跑。”<br />
+旭笑着说“来了来了”，阳翔把相机对准他们说“你们俩还真是同生共死啊”。朔夜有点不高兴，用手挡住了镜头。<br />
+冬马本想护着朔夜，但看到这情景也不由得笑了出来。<br />
+笑声喧闹，阳光刺眼，沥青的热气从鞋底传上来，谁的手机里放着无聊的音乐。仅此而已。只是几个男高中生的暑假午后。无聊、没意思，但正因如此才珍贵。<br />
+“那就明天见。午后到学校集合。”<br />
+阳翔这样宣布后，大家解散了。<br />
+推着自行车回去的路上，冬马抬头看了看天空。还不到晚霞的时候，是泛白的午后天空。太阳虽已开始西斜，但热度丝毫不减，只是影子变长，地面反上来的热气反而更强了。夏天还在途中。一个让人觉得一切都会这样持续下去的季节。<br />
+走在一旁的旭笑着说“明天真期待啊”，挥了挥手，在岔路口分别了。凑有一段路和冬马同方向，分别时礼貌地低头说“冬马前辈，明天请多关照”。刚入部不久的后辈，毫不掩饰对前辈的敬意和亲近。冬马回了句“路上小心”。书包里的塑料瓶随着自行车的颠簸发出咣当咣当的声响，晃动着。</p>
+<p>夜。<br />
+冬马开着房间窗户，躺在床上。日落之后气温也不下降。从窗户进来的风温温的，贴着床单的后背汗津津的。远处传来盂兰盆舞的太鼓声。近处稻田里的蛙鸣。邻家空调的室外机。夏夜的声音总是含着水汽。<br />
+淋浴过后只用毛巾擦过的头发还湿着，在枕头上洇出印迹。泡澡不能泡得太久。因为听着水声，会产生一种仿佛窥视着那个黑暗洞穴底部似的感觉。只迅速地冲个淋浴，这是他几年来的习惯。<br />
+群聊里正滚动着明天的携带物品清单。阳翔列出“摄像机两台”“灯”“三脚架”，旭追加了“胆量”，凑用贴图哭了。朔夜只发了“要是危险就马上回去”。冬马只点了已读，便关掉了屏幕。<br />
+望着天花板。<br />
+眼睛适应了黑暗后，墙上的污渍和天花板的纹路慢慢浮现出来。<br />
+就这样过了一会儿，桌上响起了轻微的声响。<br />
+啪嗒，一声。<br />
+只动了动脖子看过去。一直放在桌上的杯子里，水还剩一半左右。水面微微晃动。窗户开着，却没有风，空调也没开。没有晃动的理由。<br />
+冬马凝视着它，并不惊讶。这种事以前就有。洗手台的水龙头会自己松动，浴室的排水口在没人的时候咕嘟作响，只有窗边的地板早上起来时微微潮湿。频率增加是进入今年之后才有的事。<br />
+杯子的水面又晃动了。这次幅度稍大一些。就像有什么东西正从底部呼吸一样。<br />
+房间里的空气，只是稍微湿了一点。窗户明明开着，空气里却混进了与风的气味不同、来自更深之处的水的气味。<br />
+“……我知道的。”<br />
+自己也分不清是发出了声音，还是没有发出。<br />
+窗外，只有一只蝉晚了一拍鸣叫起来。</p>
+<p>翌日午后，在学校集合。<br />
+暑假中的校舍一片安静，只能远远听见运动社团的喊声。泳池今年也没有开放使用。隔着栅栏望见的水面蓝莹莹地泛着光，冬马移开了视线。<br />
+在活动室确认了器材。“终于有机会用了。”平时用手机拍摄的阳翔开心地摆出了两台摄像机，凑确认了灯的电量，旭一边组装三脚架，一边抱怨“太重了太碍事了”。莲司用手机确认旧校舍的位置。朔夜靠在墙上抱着胳膊，等着准备结束。<br />
+全员一起出发。骑自行车到旧校舍大约需要二十分钟。一行人穿过商店街，经过住宅区，骑上坡道。正午的坡道毫不留情。每踩一下踏板，小腿就像被灼烧一般，衬衫后背被汗水粘在皮肤上。阳翔单手举着摄像机蹬车，旭呻吟着说“真的要死了”。道路变窄，两旁树木增多，不久柏油路便到了尽头。进入石子路后，就得下车推行。树影变浓，蝉声愈发厚重。一走进树荫，阳光被遮住后，空气便逐渐潮湿起来。<br />
+“怎么突然凉快起来了。”<br />
+旭说道。实际上，进到山里气温会稍微下降。但冬马并不觉得那是普通的凉意。<br />
+途中，冬马从包里拿出瓶装水，喝了一口后递给走在旁边的凑。<br />
+“喝吗？当心脱水什么的。”<br />
+“啊，谢谢。”<br />
+凑开心地接过去，喝了两口左右。冬马始终面朝前方，表情没有任何变化。<br />
+把瓶装水放回去的时候，或许是想象到了接下来要去的地方，冬马的指尖微微僵住了。<br />
+身后，朔夜看着这两人的样子，同样表情没有任何变化。</p>
+<p>旧校舍已经映入眼帘。<br />
+树木对面，矗立着一座灰色建筑。共三层。外墙布满雨水流淌形成的条纹，一半以上的窗户被木板封住。原本似乎是操场的地方杂草丛生，栅栏锈蚀，部分已经倒塌。正门的遮雨檐塌陷了一角，只有那里露出骨架。<br />
+一路灼烤皮肤的日头明明没有变化，靠近建筑之后，空气的质地却不同了。热气之上，仿佛又覆盖了一层，湿气层层压上来。汗干不了。刚才还在蒸发的汗水，在这里像一层膜一样贴在皮肤上。<br />
+越靠近，蝉声越远。并非消失，只是仿佛被这地方的空气吸走一般，渐渐稀薄。取而代之，微弱的水声传来。不知从哪里来，不规则，像水滴落下的声音。明明没有下雨。<br />
+“呜哇，超有氛围的。”<br />
+阳翔举起了摄像机。旭说“这玩意儿肯定很上镜”，凑半躲到冬马身后。莲司默默环视整栋建筑。<br />
+冬马抬头望着旧校舍。<br />
+天空晴朗。然而外墙却显得斑驳湿润。窗户里面一片漆黑，什么也看不见。明明看不见，却有种被注视着的感觉。<br />
+“好嘞，跟我来！正面突破！”<br />
+阳翔用比平时更大的声音，一手拿着摄像机，另一只手握成拳头，朝正门走去。莲司无语道：“你是格斗家吗？”凑半带哭腔地说：“请不要立flag啊。”阳翔回过头笑道：“就是要立flag才好玩嘛！”<br />
+正门上了锁。阳翔无论拉还是推门把手，门都纹丝不动。<br />
+“……打不开。”<br />
+旭在一旁坏笑：“来，正面突破试试。”莲司则去查看附近的窗户。只有一扇窗户快要脱落，似乎能从那里进去。<br />
+“从这里进吧。”莲司说。<br />
+阳翔不满地说：“前辈，这可不是正门啊。”被莲司回了一句“能进去就谢天谢地吧”，便不吭声了。<br />
+阳翔打头，莲司殿后。冬马和朔夜走在正中间一带。</p>
+<p>一踏进门内，空气便为之一变。<br />
+外面八月的暑气仿佛假象一般，走廊里凉飕飕的。与其说凉，不如说是潮湿。仅仅踏进一步，手臂上的汗毛便竖了起来。方才还缠在身上的暑热，在这里换成了另一种重量。墙纸鼓胀，天花板上蔓延着水渍。地板看上去是干的。但每走一步，鞋底都迟半拍才从地面剥离。<br />
+唯有从窗缝细细透入的光，十米开外便几乎看不见了。凑打开灯，白光中浮着尘埃。<br />
+“真安静啊。”<br />
+莲司小声说道。真的很安静。连蝉声都传不进来。只有自己的脚步声、呼吸，以及不知哪里滴水的声音在回响。滴答。滴答。不规则地，却实实在在地。<br />
+“是不是有股味道？”<br />
+凑捂住鼻子。霉味。旧木头的气味。锈铁和湿纸的气味。混在其中的，还有一种更陈旧、刺鼻的气味。<br />
+阳翔开始拍摄视频。旭想开个玩笑，又作罢了。空气不容许那样。阳光下的那份轻松，在这里行不通。六个人的脚步声异常沉重地回响。<br />
+沿走廊前行。教室的门有的开着，有的关着；开着的教室里一片昏暗，桌椅零乱地留在原地。其中一间教室里，课桌仍面向讲台整齐排列，看得出四年没人碰过。黑板上留着写过什么的痕迹，但被湿气洇得看不清。<br />
+冬马的目光停留在一扇紧闭的门上。与其他门不同，唯有把手周围几乎没有生锈，像是最近刚有人碰过。<br />
+从众人前行的走廊深处，隐约——真的极其隐约——传来水流声。<br />
+那不是水声。<br />
+是在被呼唤。<br />
+并非作为有意义的话语，而是作为感觉传来。某种感受不到人类温度的东西。像在引诱着，这边有东西哦，一种知道有人来访的气息。<br />
+——到这边来<br />
+冬马低下头，用力闭上眼睛。<br />
+“冬马。”<br />
+冬马被朔夜的声音惊得睁开了眼睛。朔夜站在几米开外，望着这边。在走廊的昏暗中，唯有朔夜的眼睛清晰可见。<br />
+“你在干什么？”<br />
+“……没关系，什么事都没有。”<br />
+朔夜顺着冬马的视线望去。<br />
+走廊深处什么都没有。冬马没有将目光从那里移开。<br />
+然后朔夜凝视着冬马。两秒。三秒。<br />
+朔夜一度想开口，又作罢了，重新转向前面迈步走去。<br />
+冬马看着他的背影，也迈开了步子。</p>
+<p>走到走廊尽头时。<br />
+“……那个，前辈。”<br />
+凑停下脚步。握着灯的手微微发抖。灯光照亮了走廊前方。<br />
+“请看脚下。”<br />
+所有人都低头看去。<br />
+起初什么都没有。<br />
+本该干燥的地板。落着薄薄灰尘的油毡。<br />
+在那上面——慢慢地——浮出光脚的脚印。<br />
+湿漉漉的脚印。<br />
+一个。<br />
+又一个。<br />
+从走廊深处，朝这边而来。<br />
+一步一步，从空无一人的地方，如水渗出般浮现。<br />
+响起了啪嗒一声。<br />
+只有阳翔的摄像机在运转。<br />
+旭不再说笑。莲司上前一步，想确认脚印的前进方向。凑握紧灯，盯着光圈里又一个新出现的脚印。谁都动弹不得。<br />
+朔夜反射性地看向冬马。<br />
+冬马注视着刚刚形成的脚印。<br />
+他确实在害怕。这不是假的。<br />
+然而，在眼睛深处，有一瞬间混入了与恐惧不同的东西。<br />
+类似后悔，又类似兴奋，一种没有名字的情感。</p>
+<p>——还是来了。<br />
+蝉声已经听不见了。</p>
+
+            </div>
+
+</article>
+
+
+
+
+
+
+<div class="mod-post__poster">
+</div>
+
+</div>
+
+
+
+
+
+
+<!-- Reading Progress Component -->
+<div class="reading-progress-container">
+  <span class="reading-label">阅读进度</span>
+  <span class="reading-value">0%</span>
+  <svg class="progress-ring" viewBox="0 0 24 24">
+    <!-- Background Circle -->
+    <circle class="progress-ring__circle-bg" stroke-width="3" fill="transparent" r="10" cx="12" cy="12" />
+    <!-- Progress Circle -->
+    <circle class="progress-ring__circle" stroke-width="3" fill="transparent" r="10" cx="12" cy="12" />
+  </svg>
+</div>
+<footer id="footer" class="footer">
+    <nav>
+        
+        
+        <a class="menu-item" href="/">首页</a>
+        
+         · 
+        <a class="menu-item" href="/post">博客</a>
+        
+         · 
+        <a class="menu-item" href="/tags">标签</a>
+        
+         · 
+        <a class="menu-item" href="/post/about">关于</a>
+        
+    </nav>
+
+    <div class="Copyright">Copyright &copy; <span class="current-year"></span> <a href="https://arsenides.github.io">企鹅岛</a></div>
+    <script>document.querySelector('.current-year').textContent = new Date().getFullYear();</script>
+
+    <div class="index_footer">
+        @Arsenides ·
+        <a class="rss" href="/feed.xml" target="_blank" rel="noopener noreferrer">
+            <i class="ri-rss-line"></i>RSS
+        </a>
+    </div>
+</footer>
+
+
+
+
+    
+
+    
+<script>console.log("\n%c ✦ Gridea Pro v1.2.2 %c · Theme: amore-jinja2 v1.1.0 · https://gridea.pro %c\n","color:#fadfa3;background:#111111;padding:9px 14px;border-radius:4px 0 0 4px;font-weight:500;font-size:12px","color:#e05c00;background:#fff3ec;padding:9px 14px;border-radius:0 4px 4px 0;font-size:11px","")</script>
+</body>
+
+</html>
